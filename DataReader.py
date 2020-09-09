@@ -3,11 +3,6 @@ import csv
 from chardet import detect
 from tqdm import tqdm
 
-def get_encoding_type(file):
-	with open(file, 'rb') as f:
-		rawdata = f.read()
-	return detect(rawdata)['encoding']
-
 class DataReader:
 
     def __init__(self,file_path,sub_task=None):
@@ -19,15 +14,18 @@ class DataReader:
         labels = []
         full_name = self.file_path
         from_codec = get_encoding_type(full_name)
-        with open(full_name, 'r', encoding=from_codec,errors='replace') as f, open('temp.csv', 'w', encoding='utf-8') as e:
-            text = f.read() # for small files, for big use chunks
-            e.write(text)
-        with open('temp.csv') as tsvfile:
-            reader = csv.reader(tsvfile)
-            for i,line in enumerate(tqdm(reader,'Reading Data')):
-                if i > 0 and i < 301:
-                    labels.append(int(line[6]))
-                    data.append(line[5])
+        with open(self.file_path,encoding='utf8') as tsvfile:
+            reader = csv.reader(tsvfile, delimiter='\t')
+            for i, line in enumerate(tqdm(reader,'Reading Data')):
+                if i is 0:
+                    continue
+                label = self.str_to_label(line[-3:])
+                if self.sub_task:
+                    self.filter_subtask(data,labels,line[1],label)
+                else:
+                    labels.append(label)
+                    data.append(line[1])
+                
         return data,labels
     
     def get_test_data(self):
@@ -36,7 +34,7 @@ class DataReader:
         with open(self.file_path,encoding='utf8') as tsvfile:
             reader = csv.reader(tsvfile, delimiter='\t')
             for i,line in enumerate(tqdm(reader,'Reading Test Data')):
-                if i == 0:
+                if i is 0:
                     continue
                 data.append(line[1])
         with open('./Data/labels-levela.csv') as f:
