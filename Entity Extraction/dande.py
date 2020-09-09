@@ -1,12 +1,11 @@
-from dandelion import default_config
-from DataReader import DataReader
-from TweetNormalizer import normalizeTweet
-import torch
 import tqdm
 import _pickle as cPickle
-from pprint import pprint
+from DataReader import DataReader
 from dandelion import DataTXT
+from dandelion import default_config
+from TweetNormalizer import normalizeTweet
 
+# Initializing Dandelion API (can be obtained from https://dandelion.eu/)
 default_config['token'] = 'INSERT TOKEN'
 datatxt = DataTXT()
 
@@ -21,6 +20,7 @@ data_tst = data_tst[:]
 entities_tr = []
 entities_tst = []
 
+# Entity extraction using dandelion
 for line in tqdm.tqdm(data_tr):
     temp = []
     for annotation in datatxt.nex(normalizeTweet(line),lang='en').annotations:
@@ -32,7 +32,8 @@ for line in tqdm.tqdm(data_tst):
     for annotation in datatxt.nex(normalizeTweet(line),lang='en').annotations:
         temp.append(annotation.title)
     entities_tst.append(temp)
-    
+
+# Saving files    
 with open('./pickles/dande_train.pkl','wb') as f:
     cPickle.dump(entities_tr,f)
 with open('./pickles/dande_test.pkl','wb') as f:

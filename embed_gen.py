@@ -1,15 +1,15 @@
+import tqdm
+import numpy as np
+import _pickle as cPickle
 from gensim.corpora.wikicorpus import WikiCorpus
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
-import torch
-import numpy as np
-import tqdm
-import multiprocessing
-import _pickle as cPickle
 
+# Loading model
 f = open('./pickles/dmmodel.pkl','rb')
 print('loading model ...')
 model = cPickle.load(f)
 
+# Loading data
 f = open('./pickles/dande_train.pkl','rb')
 entities_tr = cPickle.load(f)
 f = open('./pickles/dande_test.pkl','rb')
@@ -31,22 +31,36 @@ for ent in tqdm.tqdm(entities_tst):
         temp.append(model.infer_vector([term]))
     embeddings_tst.append(temp)  
 
-features = []
+features_tr = []
+features_tst = []
 
-for i, embeds in enumerate(embeddings):
+# Stacking embeddings to generate trainable feature sets
+for tweet_embeddings in embeddings_tr:
     temp = []
-    for arr in embeds:
-        torcharr = torch.from_numpy(arr)
-        torcharr = torcharr.unsqueeze(0)
-        torcharr = torcharr.numpy()
-        temp.append(torcharr)
-    if(len(embeds)==0):
-        z = np.zeros((1,200))
-        temp.append(z)
-    res = np.mean(temp,axis = 0)
-    features.append(res)
+    for v in tweet_embeddings:
+        temp.append(v.reshape((-1,1)))
+    if len(tweet_embeddings) is 0:
+        zero_vector = np.zeros((1,200))
+        temp.append(zero_vector)
+    averaged_vector = np.mean(temp,axis = 0)
+    features_tr.append(averaged_vector)
 
-features = np.concatenate(features, axis = 0)
-with open('./pickles/caa_embed.pkl','wb') as f:
-    cPickle.dump(features,f)
+for tweet_embeddings in embeddings_tst:
+    temp = []
+    for v in tweet_embeddings:
+        temp.append(v.reshape((-1,1)))
+    if len(tweet_embeddings) is 0:
+        zero_vector = np.zeros((1,200))
+        temp.append(zero_vector)
+    averaged_vector = np.mean(temp,axis = 0)
+    features_tst.append(averaged_vector)
 
+features_tr = np.concatenate(features_tr, axis = 0)    
+features_tst = np.concatenate(features_tst, axis = 0)
+
+# Saving files
+with open('./pickles/wiki_train.pkl','wb') as f:
+    cPickle.dump(features_tr, f)
+
+with open('./pickles/wiki_test.pkl','wb') as f:
+    cPickle.dump(features_tst, f)

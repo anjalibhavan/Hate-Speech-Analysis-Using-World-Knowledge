@@ -1,15 +1,15 @@
 import torch
 import argparse
-from transformers import RobertaConfig
-from transformers import RobertaModel
-from fairseq.data.encoders.fastbpe import fastBPE
-from fairseq.data import Dictionary
-from DataReader import DataReader
-from Preprocessor import Preprocessor
 import numpy as np
 from tqdm import tqdm
 import _pickle as cPickle
+from DataReader import DataReader
 from TweetNormalizer import normalizeTweet
+from transformers import RobertaConfig
+from transformers import RobertaModel
+from fairseq.data import Dictionary
+from fairseq.data.encoders.fastbpe import fastBPE
+
 
 config = RobertaConfig.from_pretrained(
     "./BERTweet_base_transformers/config.json"
@@ -75,7 +75,7 @@ y_train = torch.FloatTensor(labels_tr)
 X_test = torch.FloatTensor(stacked_tensor_tst)
 y_test = torch.FloatTensor(labels_tst)
 
-# Dumping to pickle
+# Saving files
 with open('dataset_mean_train.pkl','wb') as f:
     cPickle.dump((X_train, y_train),f)
 
