@@ -10,7 +10,7 @@ from transformers import RobertaModel
 from fairseq.data import Dictionary
 from fairseq.data.encoders.fastbpe import fastBPE
 
-
+# Loading BERTweet model
 config = RobertaConfig.from_pretrained(
     "./BERTweet_base_transformers/config.json"
 )
@@ -32,7 +32,7 @@ bpe = fastBPE(args)
 vocab = Dictionary()
 vocab.add_from_file("./BERTweet_base_transformers/dict.txt")
 
-# Train and test set generation 
+# Loading train and test set  
 dr_tr = DataReader('./Data/olid-training-v1.tsv','A')
 data_tr, labels_tr = dr_tr.get_labelled_data()
 dr_tst = DataReader('./Data/testset-levela.tsv','A')
@@ -50,7 +50,7 @@ lines_tst = [normalizeTweet(line) for line in data_tst]
 embeddings_tr = []
 embeddings_tst = []
 
-# Generating embeddings
+# Generating BERT representation
 for line in tqdm(lines_tr,'Generating train embeddings'):
     subword = '<s> ' + bpe.encode(line) + ' </s>'
     input_id = vocab.encode_line(subword, append_eos=False, add_if_not_exist=False).long().tolist()

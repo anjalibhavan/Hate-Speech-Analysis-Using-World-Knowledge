@@ -1,6 +1,5 @@
 import numpy as np
 import csv
-from chardet import detect
 from tqdm import tqdm
 
 class DataReader:

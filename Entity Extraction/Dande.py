@@ -9,6 +9,7 @@ from TweetNormalizer import normalizeTweet
 default_config['token'] = 'INSERT TOKEN'
 datatxt = DataTXT()
 
+# Loading data
 dr_tr = DataReader('./Data/olid-training-v1.tsv','A')
 data_tr, labels_tr = dr_tr.get_labelled_data()
 dr_tst = DataReader('./Data/testset-levela.tsv','A')
@@ -33,7 +34,7 @@ for line in tqdm.tqdm(data_tst):
         temp.append(annotation.title)
     entities_tst.append(temp)
 
-# Saving files    
+# Saving to files    
 with open('./pickles/dande_train.pkl','wb') as f:
     cPickle.dump(entities_tr,f)
 with open('./pickles/dande_test.pkl','wb') as f:

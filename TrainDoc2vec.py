@@ -4,8 +4,10 @@ from gensim.test.utils import get_tmpfile
 import multiprocessing
 import _pickle as cPickle
 
+# Loading Wikipedia dump which will be used for training
 wiki = WikiCorpus("enwiki-20200701-pages-articles.xml.bz2")
 
+# Class for initializing Wikipedia dump-based document with tags
 class TaggedWikiDocument(object):
     def __init__(self, wiki):
         self.wiki = wiki
@@ -15,17 +17,19 @@ class TaggedWikiDocument(object):
             yield TaggedDocument([c for c in content], [title])
 
 Documents = TaggedWikiDocument(wiki)
-
 cores = multiprocessing.cpu_count()
 
+# Model initialization
 models = [
     Doc2Vec(dm=0, dbow_words=1, size=200, window=8, min_count=19, iter=10, workers=cores),
     Doc2Vec(dm=1, dm_mean=1, size=200, window=8, min_count=19, iter =10, workers=cores)
 ]
 
+# Building vocabulary
 models[0].build_vocab(documents)
 models[1].reset_from(models[0])
 
+# Model training
 print('training models')
 for i, model in enumerate(models):
     model.train(documents, total_examples = model.corpus_count, epochs = model.epochs)

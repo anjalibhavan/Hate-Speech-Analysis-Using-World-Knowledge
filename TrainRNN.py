@@ -5,51 +5,28 @@ import sys
 import getopt
 from torchsummary import summary
 from sklearn.metrics import *
-import random
-random.seed(3)
+from Feedforward import Feedforward
 
+# Loading data
 f = open('./pickles/dataset_mean_train.pkl', 'rb')
 X_train, y_train = cPickle.load(f)
 f = open('./pickles/dataset_mean_test.pkl', 'rb')
 X_test, y_test = cPickle.load(f)
+f = open('./pickles/wiki_train.pkl', 'rb')
+X_etrain = cPickle.load(f)
+f = open('./pickles/wiki_test.pkl', 'rb')
+X_etest = cPickle.load(f)
 
-# Model class
-class Feedforward(torch.nn.Module):
-
-        def __init__(self, input_size, hidden_size):
-            super(Feedforward, self).__init__()
-            self.input_size = input_size
-            self.hidden_size  = hidden_size
-
-            self.fc1 = torch.nn.Linear(self.input_size, self.hidden_size)
-            self.dp1 = torch.nn.Dropout(p = 0.5)
-            self.relu1 = torch.nn.ReLU()
-            
-            self.rnn1 = torch.nn.RNNCell(self.hidden_size, self.hidden_size)
-            self.tanh1 = torch.nn.Tanh()
-            self.dp2 = torch.nn.Dropout(p = 0.5)
-
-            self.fc2 = torch.nn.Linear(self.hidden_size, 2)
-            self.sigmoid = torch.nn.Sigmoid()        
-        
-        def forward(self, x):
-            fc1 = self.fc1(x)
-            dp1 = self.dp1(fc1)
-            relu1 = self.relu1(dp1)
-            
-            rnn1 = self.rnn1(relu1)
-            tanh1 = self.tanh1(rnn1)
-            dp2 = self.dp2(tanh1)
-
-            output = self.fc2(dp2)
-            output = self.sigmoid(output)
-            return output
+# Concatenating BERT and entity embeddings
+X_train = np.concatenate((X_train,X_etrain),axis=1)
+X_test = np.concatenate((X_test,X_etest),axis=1)
 
 y_train = torch.nn.functional.one_hot(y_train.to(torch.int64), num_classes=2)
 y_test = torch.nn.functional.one_hot(y_test.to(torch.int64), num_classes=2)
 y_train = y_train.float()
 y_test = y_test.float()
 
+# Setting model parameters
 learning_rate = 1e-4
 epochs = 10
 
@@ -61,6 +38,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 # Print model summary
 summary(model, input_size=(X_train.shape[1], X_train.shape[0]))
 
+# Model loss evaluation before training
 model.eval()
 y_pred = model(X_test)
 before_train = criterion(y_pred, y_test)
@@ -77,7 +55,7 @@ for epoch in range(epochs):
     loss.backward()
     optimizer.step()
 
-# Model evaluation
+# Model loss evaluation after training
 model.eval()
 y_pred = model(X_test)
 after_train = criterion(y_pred, y_test) 

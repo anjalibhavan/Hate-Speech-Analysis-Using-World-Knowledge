@@ -1,27 +1,23 @@
 import numpy as np
-from sklearn.svm import LinearSVC
 import _pickle as cPickle
-import torch
-import csv
 from sklearn.metrics import *
-import random
-random.seed(3)
+from sklearn.svm import LinearSVC
 
-# Reading data                                                                
+# Loading data                                                                
 f = open('./pickles/dataset_mean_train.pkl', 'rb')
 X_train, y_train = cPickle.load(f)
 f = open('./pickles/dataset_mean_test.pkl', 'rb')
 X_test, y_test = cPickle.load(f)
-f = open('./pickles/dmfeatures_train.pkl', 'rb')
+f = open('./pickles/wiki_train.pkl', 'rb')
 X_etrain = cPickle.load(f)
-f = open('./pickles/dmfeatures_test.pkl', 'rb')
+f = open('./pickles/wiki_test.pkl', 'rb')
 X_etest = cPickle.load(f)
 
 # Converting into appropriate datatypes for training
 X_train = X_train.numpy()
 X_test = X_test.numpy()
-y_test = torch.FloatTensor(y_test)
 
+# Concatenating BERT and entity embeddings
 X_train = np.concatenate((X_train,X_etrain),axis=1)
 X_test = np.concatenate((X_test,X_etest),axis=1)
 
