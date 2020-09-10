@@ -3,7 +3,9 @@
 This is code I wrote during my internship at Spoken Language Systems, Saarland University. I worked on hate speech detection, and the dataset used was the OffensEval hate speech corpus released in SemEval 2019. I took some references and code from these repos/websites:
 
 [OffensEval Code](https://github.com/ZeyadZanaty/offenseval/)
+
 [Doc2Vec training](https://markroxor.github.io/gensim/static/notebooks/doc2vec-wikipedia.html)
+
 [BERTweet](https://github.com/VinAIResearch/BERTweet)
 
 The steps involved are roughly this, if you wish to reproduce the code:
